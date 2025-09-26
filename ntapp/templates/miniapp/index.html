@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Теория чисел - ВШЭ</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        .status {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">📚 Теория чисел</div>
+        <div class="subtitle">Геймифицированное обучение для ВШЭ</div>
+
+        <button class="menu-btn" onclick="loadThemes()">📖 УЧЁБА</button>
+        <button class="menu-btn" onclick="startExam()">🎯 ЭКЗАМЕН</button>
+        <button class="menu-btn" onclick="showStats()">📊 СТАТИСТИКА</button>
+        <button class="menu-btn" onclick="showProfile()">👤 ПРОФИЛЬ</button>
+        <button class="menu-btn" onclick="showHelp()">❓ ПОМОЩЬ</button>
+
+        <div class="status" id="status">
+            Добро пожаловать! Выберите режим обучения.
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        let tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
+
+        async function loadThemes() {
+            document.getElementById('status').innerHTML = 'Загружаем темы...';
+            try {
+                const response = await fetch('/api/themes/');
+                const data = await response.json();
+                document.getElementById('status').innerHTML = `Найдено ${data.themes.length} тем для изучения!`;
+            } catch (error) {
+                document.getElementById('status').innerHTML = 'Ошибка загрузки тем: ' + error.message;
+            }
+        }
+
+        async function startExam() {
+            document.getElementById('status').innerHTML = 'Запускаем режим экзамена...';
+            try {
+                const response = await fetch('/api/tickets/');
+                const data = await response.json();
+                document.getElementById('status').innerHTML = `Готов экзамен по ${data.tickets.length} билетам!`;
+            } catch (error) {
+                document.getElementById('status').innerHTML = 'Ошибка загрузки билетов: ' + error.message;
+            }
+        }
+
+        function showStats() {
+            document.getElementById('status').innerHTML = 'Статистика: 0 изученных тем, 0% прогресса';
+        }
+
+        function showProfile() {
+            let user = tg?.initDataUnsafe?.user;
+            let name = user ? user.first_name : 'Студент ВШЭ';
+            document.getElementById('status').innerHTML = `Профиль: ${name}, Уровень 1, 0 XP`;
+        }
+
+        function showHelp() {
+            document.getElementById('status').innerHTML = 'Инструкция: Выберите "УЧЁБА" для изучения материала или "ЭКЗАМЕН" для проверки знаний';
+        }
+    </script>
+</body>
+</html>
