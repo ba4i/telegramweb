@@ -2,11 +2,10 @@ import telebot
 from telebot.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 
 # Токен твоего бота от BotFather
-BOT_TOKEN = "ТВОЙ_ТОКЕН_СЮДА"
-WEB_APP_URL = "https://abc123.ngrok.io"  # Замени на свой ngrok URL
+BOT_TOKEN = "8276741049:AAEoi9AEX3kKPwV_4Fgn6ox4ycG8CRSEteE"
+WEB_APP_URL = "https://telegramweb-fi6j.onrender.com"  # Замени на свой актуальный публичный URL приложения!
 
 bot = telebot.TeleBot(BOT_TOKEN)
-
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -16,7 +15,6 @@ def start(message):
         text="📚 Открыть приложение",
         web_app=web_app
     ))
-
     bot.send_message(
         message.chat.id,
         f"Привет, {message.from_user.first_name}! 👋\n\n"
@@ -30,7 +28,6 @@ def start(message):
         reply_markup=markup
     )
 
-
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     markup = InlineKeyboardMarkup()
@@ -39,13 +36,11 @@ def handle_all_messages(message):
         text="📚 Открыть приложение",
         web_app=web_app
     ))
-
     bot.send_message(
         message.chat.id,
-        "Используй кнопку ниже для открытия приложения! 👇",
+        "Используй кнопку ниже для запуска приложения!",
         reply_markup=markup
     )
-
 
 if __name__ == "__main__":
     print("🚀 Бот запущен!")
