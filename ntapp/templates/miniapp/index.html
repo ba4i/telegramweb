@@ -5,44 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Теория чисел - ВШЭ</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script>
-    // Telegram Web App инициализация
-    window.Telegram.WebApp.ready();
-    window.Telegram.WebApp.expand();
-
-    // Настройка темы
-    document.body.style.backgroundColor = window.Telegram.WebApp.backgroundColor;
-    document.body.style.color = window.Telegram.WebApp.textColor;
-
-    // Получение данных пользователя
-    const tgUser = window.Telegram.WebApp.initDataUnsafe?.user;
-    if (tgUser) {
-        console.log('Пользователь Telegram:', tgUser.first_name);
-    }
-    </script>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            min-height: 100vh;
         }
+
         .container {
             max-width: 400px;
             margin: 0 auto;
-            text-align: center;
+            padding: 20px;
         }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Главное меню */
         .title {
             font-size: 28px;
             font-weight: bold;
             margin-bottom: 10px;
+            text-align: center;
         }
+
         .subtitle {
             font-size: 16px;
             opacity: 0.8;
             margin-bottom: 30px;
+            text-align: center;
         }
+
         .menu-btn {
             display: block;
             width: 100%;
@@ -56,31 +67,284 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .menu-btn:hover {
+
+        .menu-btn:hover, .menu-btn:focus {
             background: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
         }
+
         .status {
             margin-top: 30px;
             padding: 15px;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        /* Экзамен */
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .question-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+
+        .question-text {
+            font-size: 18px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .exam-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .exam-option {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .exam-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .exam-option.correct {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4caf50;
+        }
+
+        .exam-option.incorrect {
+            background: rgba(244, 67, 54, 0.3);
+            border-color: #f44336;
+        }
+
+        .exam-option.selected {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        /* Результаты экзамена */
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .result-score {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+
+        .result-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Кнопки */
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: #4ecdc4;
+        }
+
+        .btn-primary:hover {
+            background: #45b7b8;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Загрузка */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Адаптив */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .title {
+                font-size: 24px;
+            }
+
+            .question-text {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="title">📚 Теория чисел</div>
-        <div class="subtitle">Геймифицированное обучение для ВШЭ</div>
+        <!-- Главное меню -->
+        <div class="screen active" id="homeScreen">
+            <div class="title">📚 Теория чисел</div>
+            <div class="subtitle">Геймифицированное обучение для ВШЭ</div>
 
-        <button class="menu-btn" onclick="loadThemes()">📖 УЧЁБА</button>
-        <button class="menu-btn" onclick="startExam()">🎯 ЭКЗАМЕН</button>
-        <button class="menu-btn" onclick="showStats()">📊 СТАТИСТИКА</button>
-        <button class="menu-btn" onclick="showProfile()">👤 ПРОФИЛЬ</button>
-        <button class="menu-btn" onclick="showHelp()">❓ ПОМОЩЬ</button>
+            <button class="menu-btn" onclick="loadThemes()">📖 УЧЁБА</button>
+            <button class="menu-btn" onclick="startExam()">🎯 ЭКЗАМЕН</button>
+            <button class="menu-btn" onclick="showStats()">📊 СТАТИСТИКА</button>
+            <button class="menu-btn" onclick="showProfile()">👤 ПРОФИЛЬ</button>
+            <button class="menu-btn" onclick="showHelp()">❓ ПОМОЩЬ</button>
 
-        <div class="status" id="status">
-            Добро пожаловать! Выберите режим обучения.
+            <div class="status" id="status">
+                Добро пожаловать! Выберите режим обучения.
+            </div>
+        </div>
+
+        <!-- Экран экзамена -->
+        <div class="screen" id="examScreen">
+            <div class="exam-header">
+                <div class="progress-text" id="questionProgress">1/10</div>
+                <div class="timer" id="timer">30</div>
+            </div>
+
+            <div class="question-card">
+                <div class="question-number" id="questionNumber">Вопрос 1</div>
+                <div class="question-text" id="questionText">Загружаем вопрос...</div>
+
+                <div id="examOptions" class="exam-options">
+                    <!-- Варианты ответов появятся здесь -->
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="showScreen('homeScreen')">
+                🏠 Главное меню
+            </button>
+        </div>
+
+        <!-- Экран результатов -->
+        <div class="screen" id="resultsScreen">
+            <div class="result-card">
+                <div class="result-score" id="finalScore">0/10</div>
+                <div class="result-text" id="resultMessage">Результат экзамена</div>
+
+                <div class="result-stats">
+                    <div class="stat">
+                        <div class="stat-number" id="correctCount">0</div>
+                        <div class="stat-label">Правильно</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" id="bestStreak">0</div>
+                        <div class="stat-label">Лучший стрик</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" id="timeSpent">0</div>
+                        <div class="stat-label">Секунд</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="startExam()">🎯 Пройти ещё раз</button>
+            <button class="btn btn-secondary" onclick="showScreen('homeScreen')">🏠 Главное меню</button>
+        </div>
+
+        <!-- Загрузка -->
+        <div class="screen" id="loadingScreen">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <div style="margin-top: 20px;">Загружаем вопросы...</div>
+            </div>
         </div>
     </div>
 
@@ -90,8 +354,26 @@
         if (tg) {
             tg.expand();
             tg.ready();
+
+            // Настройка темы
+            document.body.style.backgroundColor = tg.themeParams?.bg_color || '#667eea';
+            document.body.style.color = tg.themeParams?.text_color || 'white';
         }
 
+        // Глобальные переменные для экзамена
+        let currentExam = null;
+        let examTimer = null;
+        let examStartTime = null;
+
+        // Функция переключения экранов
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Загрузка тем
         async function loadThemes() {
             document.getElementById('status').innerHTML = 'Загружаем темы...';
             try {
@@ -103,30 +385,201 @@
             }
         }
 
+        // Начало экзамена
         async function startExam() {
-            document.getElementById('status').innerHTML = 'Запускаем режим экзамена...';
+            showScreen('loadingScreen');
+
             try {
                 const response = await fetch('/api/tickets/');
                 const data = await response.json();
-                document.getElementById('status').innerHTML = `Готов экзамен по ${data.tickets.length} билетам!`;
+
+                if (data.tickets && data.tickets.length > 0) {
+                    // Перемешиваем билеты и берём первые 10
+                    const shuffled = data.tickets.sort(() => 0.5 - Math.random());
+                    const examQuestions = shuffled.slice(0, Math.min(10, shuffled.length));
+
+                    // Инициализируем экзамен
+                    currentExam = {
+                        questions: examQuestions,
+                        currentQuestion: 0,
+                        correctAnswers: 0,
+                        currentStreak: 0,
+                        bestStreak: 0,
+                        selectedAnswers: [],
+                        timeLeft: 30
+                    };
+
+                    examStartTime = Date.now();
+                    showScreen('examScreen');
+                    showNextQuestion();
+                } else {
+                    throw new Error('Вопросы не найдены');
+                }
             } catch (error) {
+                console.error('Ошибка загрузки экзамена:', error);
                 document.getElementById('status').innerHTML = 'Ошибка загрузки билетов: ' + error.message;
+                showScreen('homeScreen');
             }
         }
 
+        // Показ следующего вопроса
+        function showNextQuestion() {
+            if (!currentExam || currentExam.currentQuestion >= currentExam.questions.length) {
+                showExamResults();
+                return;
+            }
+
+            const question = currentExam.questions[currentExam.currentQuestion];
+
+            // Обновляем интерфейс
+            document.getElementById('questionNumber').textContent = `Вопрос ${currentExam.currentQuestion + 1}`;
+            document.getElementById('questionText').textContent = question.question || 'Вопрос не найден';
+            document.getElementById('questionProgress').textContent = `${currentExam.currentQuestion + 1}/${currentExam.questions.length}`;
+
+            // Создаём варианты ответов
+            const correctAnswer = question.answer || 'Правильный ответ';
+            const options = [
+                correctAnswer,
+                "Неправильный вариант 1",
+                "Неправильный вариант 2",
+                "Неправильный вариант 3"
+            ];
+
+            // Перемешиваем варианты
+            const shuffledOptions = options.sort(() => 0.5 - Math.random());
+            currentExam.correctIndex = shuffledOptions.indexOf(correctAnswer);
+
+            // Отображаем кнопки ответов
+            const optionsContainer = document.getElementById('examOptions');
+            optionsContainer.innerHTML = '';
+
+            shuffledOptions.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'exam-option';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+
+            // Запускаем таймер
+            currentExam.timeLeft = 30;
+            startTimer();
+        }
+
+        // Таймер
+        function startTimer() {
+            if (examTimer) clearInterval(examTimer);
+
+            examTimer = setInterval(() => {
+                currentExam.timeLeft--;
+                document.getElementById('timer').textContent = currentExam.timeLeft;
+
+                if (currentExam.timeLeft <= 0) {
+                    clearInterval(examTimer);
+                    selectAnswer(-1); // Время истекло
+                }
+            }, 1000);
+        }
+
+        // Выбор ответа
+        function selectAnswer(selectedIndex) {
+            if (examTimer) clearInterval(examTimer);
+
+            const options = document.querySelectorAll('.exam-option');
+            const isCorrect = selectedIndex === currentExam.correctIndex;
+
+            // Показываем правильность ответов
+            options.forEach((option, index) => {
+                if (index === currentExam.correctIndex) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex) {
+                    option.classList.add('incorrect');
+                }
+                option.onclick = null; // Отключаем клики
+            });
+
+            // Обновляем статистику
+            if (isCorrect) {
+                currentExam.correctAnswers++;
+                currentExam.currentStreak++;
+                if (currentExam.currentStreak > currentExam.bestStreak) {
+                    currentExam.bestStreak = currentExam.currentStreak;
+                }
+            } else {
+                currentExam.currentStreak = 0;
+            }
+
+            currentExam.selectedAnswers.push({
+                question: currentExam.questions[currentExam.currentQuestion],
+                selectedIndex: selectedIndex,
+                correctIndex: currentExam.correctIndex,
+                isCorrect: isCorrect
+            });
+
+            currentExam.currentQuestion++;
+
+            // Переход к следующему вопросу через 2 секунды
+            setTimeout(() => {
+                showNextQuestion();
+            }, 2000);
+        }
+
+        // Показ результатов экзамена
+        function showExamResults() {
+            const totalQuestions = currentExam.questions.length;
+            const correctAnswers = currentExam.correctAnswers;
+            const timeSpent = Math.round((Date.now() - examStartTime) / 1000);
+
+            // Обновляем результаты
+            document.getElementById('finalScore').textContent = `${correctAnswers}/${totalQuestions}`;
+            document.getElementById('correctCount').textContent = correctAnswers;
+            document.getElementById('bestStreak').textContent = currentExam.bestStreak;
+            document.getElementById('timeSpent').textContent = timeSpent;
+
+            // Сообщение по результатам
+            let message = '';
+            const percentage = (correctAnswers / totalQuestions) * 100;
+
+            if (percentage >= 90) {
+                message = '🏆 Отлично! Вы настоящий эксперт!';
+            } else if (percentage >= 70) {
+                message = '👏 Хорошо! Продолжайте в том же духе!';
+            } else if (percentage >= 50) {
+                message = '📚 Неплохо, но есть над чем поработать!';
+            } else {
+                message = '💪 Не расстраивайтесь, практика - путь к совершенству!';
+            }
+
+            document.getElementById('resultMessage').textContent = message;
+
+            showScreen('resultsScreen');
+        }
+
+        // Статистика
         function showStats() {
             document.getElementById('status').innerHTML = 'Статистика: 0 изученных тем, 0% прогресса';
         }
 
+        // Профиль
         function showProfile() {
             let user = tg?.initDataUnsafe?.user;
             let name = user ? user.first_name : 'Студент ВШЭ';
             document.getElementById('status').innerHTML = `Профиль: ${name}, Уровень 1, 0 XP`;
         }
 
+        // Помощь
         function showHelp() {
             document.getElementById('status').innerHTML = 'Инструкция: Выберите "УЧЁБА" для изучения материала или "ЭКЗАМЕН" для проверки знаний';
         }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Получение данных пользователя
+            const tgUser = tg?.initDataUnsafe?.user;
+            if (tgUser) {
+                console.log('Пользователь Telegram:', tgUser.first_name);
+            }
+        });
     </script>
 </body>
 </html>
