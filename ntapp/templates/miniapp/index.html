@@ -2,230 +2,657 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Теория чисел - ВШЭ</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Встроенные стили для быстрого исправления */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* CSS переменные для Telegram Mini App */
+        :root {
+            --tg-theme-bg-color: var(--tg-color-scheme-bg, #212d3b);
+            --tg-theme-secondary-bg-color: var(--tg-color-scheme-secondary-bg, #131415);
+            --tg-theme-text-color: var(--tg-color-scheme-text, #ffffff);
+            --tg-theme-hint-color: var(--tg-color-scheme-hint, #707579);
+            --tg-theme-link-color: var(--tg-color-scheme-link, #6ab7ff);
+            --tg-theme-button-color: var(--tg-color-scheme-button, #6ab7ff);
+            --tg-theme-button-text-color: var(--tg-color-scheme-button-text, #ffffff);
+            --tg-theme-header-bg-color: var(--tg-color-scheme-header-bg, #17212b);
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-            background: #1a1a1a;
-            color: #ffffff;
-            min-height: 100vh;
+            /* Цвета по умолчанию для веб-версии */
+            --primary-color: #4ecdc4;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --warning-color: #ff9800;
+            --surface-color: #2a2a2a;
+            --background-color: #1a1a1a;
         }
 
-        .app { padding: 16px; padding-bottom: 80px; }
+        /* Переопределение для Mini App */
+        .telegram-miniapp {
+            --primary-color: var(--tg-theme-button-color, #6ab7ff);
+            --background-color: var(--tg-theme-bg-color, #212d3b);
+            --surface-color: var(--tg-theme-secondary-bg-color, #131415);
+        }
 
-        .screen { display: none; }
-        .screen.active { display: block; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
 
-        .profile-card {
-            display: flex;
-            align-items: center;
-            background: #2a2a2a;
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+            background: var(--background-color);
+            color: var(--tg-theme-text-color, #ffffff);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            margin: 0;
+            padding: 0;
+            /* Убираем системные отступы для iOS */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .app {
+            width: 100%;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px;
+            padding-bottom: calc(80px + env(safe-area-inset-bottom));
+            /* Скрываем скроллбар */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .app::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Экраны */
+        .screen {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .screen.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Карточки */
+        .card {
+            background: var(--surface-color);
             border-radius: 16px;
             padding: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
+            /* Тень для Mini App */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Профиль */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
         .profile-avatar {
-            width: 56px; height: 56px;
-            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--primary-color), #44a08d);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px; font-weight: 600;
-            margin-right: 16px;
+            font-size: 20px;
+            font-weight: 600;
+            margin-right: 12px;
+            color: #ffffff;
+            flex-shrink: 0;
         }
 
-        .profile-info h2 { font-size: 18px; margin-bottom: 4px; }
-        .level { font-size: 14px; color: #b8b8b8; margin-bottom: 8px; }
-        .xp-bar {
-            width: 120px; height: 4px;
-            background: rgba(78, 205, 196, 0.2);
-            border-radius: 2px; margin-bottom: 4px;
+        .profile-info {
+            flex: 1;
+            min-width: 0;
         }
+
+        .profile-info h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .level {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #707579);
+            margin-bottom: 6px;
+        }
+
+        .xp-bar {
+            width: 100px;
+            height: 3px;
+            background: rgba(78, 205, 196, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 3px;
+        }
+
         .xp-fill {
             height: 100%;
-            background: #4ecdc4;
+            background: var(--primary-color);
             border-radius: 2px;
-            transition: width 0.3s ease;
+            transition: width 0.5s ease;
         }
-        .xp-text { font-size: 12px; color: #b8b8b8; }
 
-        .app-header { text-align: center; margin-bottom: 32px; }
-        .app-header h1 { font-size: 28px; margin-bottom: 8px; }
-        .app-header p { font-size: 16px; color: #b8b8b8; }
+        .xp-text {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #707579);
+        }
 
+        /* Заголовок */
+        .app-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .app-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, var(--primary-color), #44a08d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .app-header p {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #707579);
+        }
+
+        /* Сетка меню - адаптивная */
         .menu-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px; margin-bottom: 24px;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 350px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
         }
 
         .menu-card {
-            background: #2a2a2a; border: none;
-            border-radius: 16px; padding: 24px 16px;
-            text-align: center; color: #ffffff;
-            cursor: pointer; transition: all 0.3s ease;
+            background: var(--surface-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: center;
+            color: var(--tg-theme-text-color, #ffffff);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .menu-card:active { transform: scale(0.98); opacity: 0.8; }
-        .menu-icon { font-size: 32px; margin-bottom: 12px; }
-        .menu-card h3 { font-size: 16px; margin-bottom: 4px; }
-        .menu-card p { font-size: 12px; color: #b8b8b8; }
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
 
+        .menu-card:active::before {
+            opacity: 1;
+        }
+
+        .menu-card:active {
+            transform: scale(0.95);
+        }
+
+        .menu-icon {
+            font-size: 26px;
+            margin-bottom: 8px;
+            display: block;
+            line-height: 1;
+        }
+
+        .menu-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 3px;
+            line-height: 1.2;
+        }
+
+        .menu-card p {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #707579);
+            line-height: 1.2;
+        }
+
+        /* Статус */
         .status {
-            background: #2a2a2a; border-radius: 12px;
-            padding: 16px; font-size: 14px; text-align: center;
-            color: #b8b8b8;
+            background: var(--surface-color);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            text-align: center;
+            color: var(--tg-theme-hint-color, #707579);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            line-height: 1.3;
         }
-        .status.error { background: rgba(244, 67, 54, 0.2); color: #ff4444; }
+
+        .status.error {
+            background: rgba(244, 67, 54, 0.15);
+            color: var(--error-color);
+            border-color: rgba(244, 67, 54, 0.3);
+        }
 
         /* Экзамен */
         .exam-header {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #2a2a2a; border-radius: 16px;
-            padding: 16px 20px; margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .back-btn {
-            background: none; border: none; color: #4ecdc4;
-            font-size: 24px; cursor: pointer; padding: 4px;
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: background 0.2s ease;
         }
 
-        .progress { font-size: 16px; font-weight: 600; }
+        .back-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .progress {
+            font-size: 15px;
+            font-weight: 600;
+        }
 
         .timer {
-            background: rgba(255, 107, 107, 0.2); color: #ff6b6b;
-            padding: 8px 16px; border-radius: 12px;
-            font-size: 18px; font-weight: 600;
-            min-width: 50px; text-align: center;
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            min-width: 45px;
+            text-align: center;
+            border: 1px solid rgba(255, 107, 107, 0.3);
         }
 
+        .timer.warning {
+            animation: pulse 1s infinite;
+        }
+
+        /* Вопрос */
         .question-card {
-            background: #2a2a2a; border-radius: 16px;
-            padding: 24px; margin-bottom: 20px;
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .question-number {
-            color: #4ecdc4; font-size: 14px; font-weight: 600; margin-bottom: 16px;
+            color: var(--primary-color);
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .question-text { font-size: 18px; line-height: 1.5; margin-bottom: 24px; }
+        .question-text {
+            font-size: 16px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            word-wrap: break-word;
+        }
 
-        .options { display: flex; flex-direction: column; gap: 12px; }
+        /* Варианты ответов */
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
         .option {
-            background: #1a1a1a; border: 2px solid transparent;
-            border-radius: 12px; padding: 16px;
-            color: #ffffff; font-size: 16px;
-            text-align: left; cursor: pointer;
-            transition: all 0.3s ease; line-height: 1.4;
+            background: var(--tg-theme-bg-color, var(--background-color));
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 14px 16px;
+            color: var(--tg-theme-text-color, #ffffff);
+            font-size: 15px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1.3;
+            word-wrap: break-word;
+            position: relative;
+            overflow: hidden;
         }
 
-        .option:active { transform: scale(0.98); }
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .option:active::before {
+            opacity: 1;
+        }
+
+        .option:active {
+            transform: scale(0.98);
+        }
+
         .option.correct {
             background: rgba(76, 175, 80, 0.2);
-            border-color: #4caf50; color: #4caf50;
+            border-color: var(--success-color);
+            color: var(--success-color);
         }
+
         .option.incorrect {
             background: rgba(244, 67, 54, 0.2);
-            border-color: #f44336; color: #f44336;
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
         /* Результаты */
-        .result-header { display: flex; align-items: center; margin-bottom: 24px; }
-        .result-header h2 { margin-left: 16px; font-size: 20px; }
+        .result-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .result-header h2 {
+            margin-left: 12px;
+            font-size: 18px;
+            font-weight: 600;
+        }
 
         .result-card {
-            background: #2a2a2a; border-radius: 16px;
-            padding: 32px 24px; text-align: center; margin-bottom: 24px;
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 20px 16px;
+            text-align: center;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .score {
-            font-size: 48px; font-weight: 700;
-            background: linear-gradient(135deg, #4ecdc4, #44a08d);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), #44a08d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .result-message {
+            font-size: 16px;
             margin-bottom: 16px;
+            line-height: 1.3;
         }
 
-        .result-message { font-size: 18px; margin-bottom: 24px; }
-
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 16px; margin-top: 20px;
-        }
-
-        .stat {
-            background: #1a1a1a; border-radius: 12px;
-            padding: 16px 8px; text-align: center;
-        }
-
-        .stat-value {
-            font-size: 24px; font-weight: 700;
-            color: #4ecdc4; margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 12px; color: #b8b8b8;
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-
-        /* Очки и бонусы */
+        /* Разбивка очков */
         .score-breakdown {
-            background: #1a1a1a; border-radius: 12px;
-            padding: 20px; margin: 20px 0; text-align: left;
+            background: var(--tg-theme-bg-color, var(--background-color));
+            border-radius: 10px;
+            padding: 14px;
+            margin: 16px 0;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .score-breakdown h4 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-size: 14px;
         }
 
         .score-item {
-            display: flex; justify-content: space-between;
-            margin: 8px 0; padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0;
+            padding: 3px 0;
+            font-size: 13px;
         }
 
         .score-item.total {
-            border-top: 1px solid #333; padding-top: 8px; margin-top: 12px;
-            font-weight: 600; color: #4ecdc4;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 8px;
+            margin-top: 10px;
+            font-weight: 600;
+            color: var(--primary-color);
         }
 
-        .button-group { display: flex; gap: 12px; }
+        /* Статистики */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .stat {
+            background: var(--tg-theme-bg-color, var(--background-color));
+            border-radius: 8px;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--tg-theme-hint-color, #707579);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Кнопки */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
 
         .btn {
-            flex: 1; padding: 16px 20px; border: none;
-            border-radius: 12px; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: all 0.3s ease;
+            flex: 1;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn:active { transform: scale(0.96); }
-        .btn.primary { background: #4ecdc4; color: #ffffff; }
-        .btn.secondary { background: #2a2a2a; color: #ffffff; }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
 
-        .loading { text-align: center; padding: 64px 24px; }
+        .btn:active::before {
+            opacity: 1;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn.primary {
+            background: var(--primary-color);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .btn.secondary {
+            background: var(--surface-color);
+            color: var(--tg-theme-text-color, #ffffff);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Загрузка */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
         .spinner {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(78, 205, 196, 0.2);
-            border-top: 3px solid #4ecdc4;
-            border-radius: 50%; animation: spin 1s linear infinite;
-            margin: 0 auto 24px;
+            width: 32px;
+            height: 32px;
+            border: 2px solid rgba(78, 205, 196, 0.2);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .loading p {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #707579);
+        }
 
-        @media (max-width: 360px) {
-            .app { padding: 12px; }
-            .menu-grid { grid-template-columns: 1fr; }
+        /* Анимации */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Адаптация под очень маленькие экраны */
+        @media (max-height: 600px) {
+            .app {
+                padding: 8px;
+                padding-bottom: calc(60px + env(safe-area-inset-bottom));
+            }
+
+            .card {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+
+            .app-header {
+                margin-bottom: 16px;
+            }
+
+            .menu-grid {
+                gap: 8px;
+            }
+
+            .menu-card {
+                padding: 12px 8px;
+            }
+        }
+
+        /* Адаптация под узкие экраны */
+        @media (max-width: 320px) {
+            .app {
+                padding: 6px;
+            }
+
+            .profile-avatar {
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+
+            .app-header h1 {
+                font-size: 20px;
+            }
+
+            .question-text {
+                font-size: 15px;
+            }
+
+            .option {
+                font-size: 14px;
+                padding: 12px 14px;
+            }
         }
     </style>
 </head>
-<body>
+<body class="telegram-miniapp">
     <div class="app" id="app">
         <!-- Главное меню -->
         <div class="screen active" id="homeScreen">
-            <div class="profile-card">
+            <div class="card profile-section">
                 <div class="profile-avatar" id="userAvatar">👤</div>
                 <div class="profile-info">
                     <h2 id="userName">Студент ВШЭ</h2>
@@ -243,29 +670,29 @@
             </div>
 
             <div class="menu-grid">
-                <button class="menu-card" onclick="startExam()">
+                <div class="menu-card" onclick="startExam()">
                     <div class="menu-icon">🎯</div>
                     <h3>ЭКЗАМЕН</h3>
                     <p>10 вопросов • 30 сек</p>
-                </button>
+                </div>
 
-                <button class="menu-card" onclick="showLeaderboard()">
+                <div class="menu-card" onclick="showLeaderboard()">
                     <div class="menu-icon">🏆</div>
                     <h3>РЕЙТИНГ</h3>
                     <p>Таблица лидеров</p>
-                </button>
+                </div>
 
-                <button class="menu-card" onclick="showStats()">
+                <div class="menu-card" onclick="showStats()">
                     <div class="menu-icon">📊</div>
                     <h3>СТАТИСТИКА</h3>
                     <p>Твой прогресс</p>
-                </button>
+                </div>
 
-                <button class="menu-card" onclick="showHelp()">
+                <div class="menu-card" onclick="showHelp()">
                     <div class="menu-icon">❓</div>
                     <h3>ПОМОЩЬ</h3>
                     <p>Правила игры</p>
-                </button>
+                </div>
             </div>
 
             <div class="status" id="statusMessage">
@@ -276,14 +703,14 @@
         <!-- Экран экзамена -->
         <div class="screen" id="examScreen">
             <div class="exam-header">
-                <button class="back-btn" onclick="showScreen('homeScreen')">←</button>
+                <div class="back-btn" onclick="showScreen('homeScreen')">←</div>
                 <div class="progress">
                     <span id="questionProgress">1/10</span>
                 </div>
                 <div class="timer" id="timer">30</div>
             </div>
 
-            <div class="question-card">
+            <div class="question-card card">
                 <div class="question-number" id="questionNumber">Вопрос 1</div>
                 <div class="question-text" id="questionText">Загружаем вопросы...</div>
 
@@ -293,20 +720,20 @@
             </div>
         </div>
 
-        <!-- Экран результатов с очками -->
+        <!-- Экран результатов -->
         <div class="screen" id="resultsScreen">
             <div class="result-header">
-                <button class="back-btn" onclick="showScreen('homeScreen')">←</button>
+                <div class="back-btn" onclick="showScreen('homeScreen')">←</div>
                 <h2>🎉 Результаты</h2>
             </div>
 
-            <div class="result-card">
+            <div class="result-card card">
                 <div class="score" id="finalScore">0/10</div>
                 <div class="result-message" id="resultMessage">Результат</div>
 
                 <!-- Разбивка очков -->
                 <div class="score-breakdown" id="scoreBreakdown">
-                    <h4 style="margin-bottom: 12px; color: #4ecdc4;">💰 Заработанные очки:</h4>
+                    <h4>💰 Заработанные очки:</h4>
                     <div class="score-item">
                         <span>Правильные ответы:</span>
                         <span id="basePoints">0 очков</span>
@@ -350,8 +777,8 @@
             </div>
 
             <div class="button-group">
-                <button class="btn primary" onclick="startExam()">🎯 Ещё раз</button>
-                <button class="btn secondary" onclick="showScreen('homeScreen')">🏠 Меню</button>
+                <div class="btn primary" onclick="startExam()">🎯 Ещё раз</div>
+                <div class="btn secondary" onclick="showScreen('homeScreen')">🏠 Меню</div>
             </div>
         </div>
 
@@ -365,8 +792,8 @@
     </div>
 
     <script>
-        // Менеджер игры с системой очков
-        class GameManager {
+        // Класс для управления Telegram Mini App
+        class TelegramMiniApp {
             constructor() {
                 this.tg = window.Telegram?.WebApp;
                 this.currentExam = null;
@@ -374,47 +801,95 @@
                 this.startTime = null;
                 this.userProfile = null;
 
-                this.initTelegram();
-                this.loadUserProfile();
-
-                console.log('GameManager инициализирован');
+                this.init();
             }
 
-            initTelegram() {
+            init() {
+                // Инициализируем Telegram WebApp
                 if (this.tg) {
                     this.tg.ready();
                     this.tg.expand();
+                    this.tg.enableClosingConfirmation();
 
-                    // Настраиваем кнопку Назад
-                    this.tg.BackButton.onClick(() => {
-                        const currentScreen = document.querySelector('.screen.active').id;
-                        if (currentScreen === 'homeScreen') {
-                            this.tg.close();
-                        } else {
-                            this.showScreen('homeScreen');
-                        }
-                    });
+                    // Применяем тему Telegram
+                    this.applyTelegramTheme();
 
-                    // Отслеживаем смену экранов
-                    const observer = new MutationObserver(() => {
-                        const currentScreen = document.querySelector('.screen.active').id;
-                        if (currentScreen === 'homeScreen') {
-                            this.tg.BackButton.hide();
-                        } else {
-                            this.tg.BackButton.show();
-                        }
-                    });
+                    // Настройка навигации
+                    this.setupNavigation();
 
-                    observer.observe(document.body, {
-                        childList: true, subtree: true, attributes: true
-                    });
+                    // Настройка главной кнопки
+                    this.tg.MainButton.hide();
+
+                    console.log('Telegram WebApp инициализирован');
+                } else {
+                    console.log('Работает в веб-версии');
+                }
+
+                // Загружаем профиль пользователя
+                this.loadUserProfile();
+            }
+
+            applyTelegramTheme() {
+                if (!this.tg?.themeParams) return;
+
+                const theme = this.tg.themeParams;
+                const root = document.documentElement;
+
+                if (theme.bg_color) root.style.setProperty('--tg-theme-bg-color', theme.bg_color);
+                if (theme.secondary_bg_color) root.style.setProperty('--tg-theme-secondary-bg-color', theme.secondary_bg_color);
+                if (theme.text_color) root.style.setProperty('--tg-theme-text-color', theme.text_color);
+                if (theme.hint_color) root.style.setProperty('--tg-theme-hint-color', theme.hint_color);
+                if (theme.link_color) root.style.setProperty('--tg-theme-link-color', theme.link_color);
+                if (theme.button_color) root.style.setProperty('--tg-theme-button-color', theme.button_color);
+                if (theme.button_text_color) root.style.setProperty('--tg-theme-button-text-color', theme.button_text_color);
+                if (theme.header_bg_color) root.style.setProperty('--tg-theme-header-bg-color', theme.header_bg_color);
+
+                // Применяем цвета
+                document.body.style.backgroundColor = theme.bg_color || '#212d3b';
+                document.body.style.color = theme.text_color || '#ffffff';
+            }
+
+            setupNavigation() {
+                if (!this.tg) return;
+
+                // Кнопка "Назад"
+                this.tg.BackButton.onClick(() => {
+                    const currentScreen = document.querySelector('.screen.active').id;
+                    if (currentScreen === 'homeScreen') {
+                        this.tg.close();
+                    } else {
+                        this.showScreen('homeScreen');
+                    }
+                });
+
+                // Отслеживаем смену экранов
+                const observer = new MutationObserver(() => {
+                    const currentScreen = document.querySelector('.screen.active').id;
+                    if (currentScreen === 'homeScreen') {
+                        this.tg.BackButton.hide();
+                    } else {
+                        this.tg.BackButton.show();
+                    }
+                });
+
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+            }
+
+            hapticFeedback(type) {
+                if (this.tg?.HapticFeedback) {
+                    this.tg.HapticFeedback.impactOccurred(type);
                 }
             }
 
             async loadUserProfile() {
                 try {
                     const user = this.tg?.initDataUnsafe?.user;
-                    const userId = user?.id || 'demo_user';
+                    const userId = user?.id || 'demo_user_' + Date.now();
 
                     const response = await fetch(`/api/user-profile/?user_id=${userId}`);
                     const data = await response.json();
@@ -424,7 +899,6 @@
 
                 } catch (error) {
                     console.error('Ошибка загрузки профиля:', error);
-                    // Используем демо-профиль
                     this.userProfile = {
                         first_name: 'Студент ВШЭ',
                         level: 1,
@@ -441,7 +915,7 @@
                 if (!this.userProfile) return;
 
                 const user = this.tg?.initDataUnsafe?.user;
-                const displayName = user?.first_name || this.userProfile.first_name;
+                const displayName = user?.first_name || this.userProfile.first_name || 'Студент';
 
                 document.getElementById('userName').textContent = displayName;
                 document.getElementById('userAvatar').textContent =
@@ -449,20 +923,25 @@
                 document.getElementById('userLevel').textContent =
                     `Уровень ${this.userProfile.level} • ${this.userProfile.total_score} очков`;
                 document.getElementById('xpFill').style.width =
-                    `${this.userProfile.experience_percent}%`;
+                    `${Math.min(100, this.userProfile.experience_percent)}%`;
                 document.getElementById('xpText').textContent =
                     `${this.userProfile.experience}/${this.userProfile.experience_for_next} опыта`;
             }
 
             showScreen(screenId) {
+                // Скрываем все экраны
                 document.querySelectorAll('.screen').forEach(screen => {
                     screen.classList.remove('active');
                 });
-                document.getElementById(screenId).classList.add('active');
 
-                if (this.tg?.HapticFeedback) {
-                    this.tg.HapticFeedback.impactOccurred('light');
+                // Показываем нужный
+                const targetScreen = document.getElementById(screenId);
+                if (targetScreen) {
+                    targetScreen.classList.add('active');
                 }
+
+                // Haptic feedback
+                this.hapticFeedback('light');
             }
 
             showMessage(message, type = 'info') {
@@ -515,27 +994,31 @@
 
                 const question = this.currentExam.questions[this.currentExam.currentQuestionIndex];
 
+                // Обновляем UI
                 document.getElementById('questionNumber').textContent =
                     `Вопрос ${this.currentExam.currentQuestionIndex + 1}`;
                 document.getElementById('questionText').textContent = question.question;
                 document.getElementById('questionProgress').textContent =
                     `${this.currentExam.currentQuestionIndex + 1}/${this.currentExam.questions.length}`;
 
+                // Создаем варианты ответов
                 const options = [question.correct_answer, ...question.wrong_answers];
                 const shuffled = this.shuffleArray([...options]);
                 this.currentExam.correctIndex = shuffled.indexOf(question.correct_answer);
 
+                // Отображаем варианты
                 const container = document.getElementById('examOptions');
                 container.innerHTML = '';
 
                 shuffled.forEach((option, index) => {
-                    const button = document.createElement('button');
+                    const button = document.createElement('div');
                     button.className = 'option';
                     button.textContent = option;
                     button.onclick = () => this.selectAnswer(index);
                     container.appendChild(button);
                 });
 
+                // Запускаем таймер
                 this.currentExam.timeLeft = 30;
                 this.startTimer();
             }
@@ -552,18 +1035,20 @@
             startTimer() {
                 if (this.timer) clearInterval(this.timer);
 
+                const timerEl = document.getElementById('timer');
+
                 this.timer = setInterval(() => {
                     this.currentExam.timeLeft--;
-                    const timerEl = document.getElementById('timer');
                     timerEl.textContent = this.currentExam.timeLeft;
 
                     if (this.currentExam.timeLeft <= 5) {
-                        timerEl.style.color = '#ff4444';
-                        timerEl.style.animation = 'pulse 1s infinite';
+                        timerEl.classList.add('warning');
+                    } else {
+                        timerEl.classList.remove('warning');
                     }
 
                     if (this.currentExam.timeLeft <= 0) {
-                        this.selectAnswer(-1);
+                        this.selectAnswer(-1); // Время истекло
                     }
                 }, 1000);
             }
@@ -574,15 +1059,18 @@
                 const isCorrect = selectedIndex === this.currentExam.correctIndex;
                 const options = document.querySelectorAll('.option');
 
+                // Показываем результат
                 options.forEach((option, index) => {
                     if (index === this.currentExam.correctIndex) {
                         option.classList.add('correct');
-                    } else if (index === selectedIndex && !isCorrect) {
+                    } else if (index === selectedIndex && selectedIndex !== -1) {
                         option.classList.add('incorrect');
                     }
                     option.onclick = null;
+                    option.style.pointerEvents = 'none';
                 });
 
+                // Обновляем статистику
                 if (isCorrect) {
                     this.currentExam.correctAnswers++;
                     this.currentExam.currentStreak++;
@@ -593,12 +1081,15 @@
                     this.currentExam.currentStreak = 0;
                 }
 
-                if (this.tg?.HapticFeedback) {
-                    this.tg.HapticFeedback.notificationOccurred(isCorrect ? 'success' : 'error');
-                }
+                // Haptic feedback
+                this.hapticFeedback(isCorrect ? 'success' : 'error');
 
                 this.currentExam.currentQuestionIndex++;
-                setTimeout(() => this.showNextQuestion(), 2000);
+
+                // Следующий вопрос через 2 секунды
+                setTimeout(() => {
+                    this.showNextQuestion();
+                }, 2000);
             }
 
             async finishExam() {
@@ -607,12 +1098,13 @@
                 const correctAnswers = this.currentExam.correctAnswers;
                 const percentage = Math.round((correctAnswers / totalQuestions) * 100);
 
-                // Обновляем интерфейс результатов
+                // Обновляем UI результатов
                 document.getElementById('finalScore').textContent = `${correctAnswers}/${totalQuestions}`;
                 document.getElementById('correctCount').textContent = correctAnswers;
                 document.getElementById('bestStreak').textContent = this.currentExam.bestStreak;
                 document.getElementById('timeSpent').textContent = `${totalTime}с`;
 
+                // Определяем сообщение
                 let message = '';
                 if (percentage >= 90) {
                     message = '🏆 Превосходно! Вы эксперт в теории чисел!';
@@ -625,11 +1117,11 @@
                 }
                 document.getElementById('resultMessage').textContent = message;
 
-                // Сохраняем результат и получаем очки
+                // Сохраняем результат
                 try {
                     const user = this.tg?.initDataUnsafe?.user;
                     const resultData = {
-                        user_id: user?.id || 'demo_user',
+                        user_id: user?.id || 'demo_user_' + Date.now(),
                         username: user?.username || '',
                         first_name: user?.first_name || 'Студент',
                         total_questions: totalQuestions,
@@ -664,9 +1156,8 @@
                     console.error('Ошибка сохранения результата:', error);
                 }
 
-                if (this.tg?.HapticFeedback) {
-                    this.tg.HapticFeedback.notificationOccurred(percentage >= 70 ? 'success' : 'warning');
-                }
+                // Финальный haptic feedback
+                this.hapticFeedback(percentage >= 70 ? 'success' : 'warning');
 
                 this.showScreen('resultsScreen');
             }
@@ -684,28 +1175,47 @@
             }
 
             showLevelUpAnimation(newLevel) {
-                // Простая анимация повышения уровня
-                setTimeout(() => {
-                    if (this.tg?.HapticFeedback) {
-                        this.tg.HapticFeedback.notificationOccurred('success');
-                    }
-                    alert(`🎉 Поздравляем! Вы достигли ${newLevel} уровня!`);
-                }, 1000);
+                // Haptic feedback для повышения уровня
+                this.hapticFeedback('success');
+
+                // Показываем уведомление через Telegram
+                if (this.tg?.showAlert) {
+                    this.tg.showAlert(`🎉 Поздравляем! Вы достигли ${newLevel} уровня!`);
+                } else {
+                    setTimeout(() => {
+                        alert(`🎉 Поздравляем! Вы достигли ${newLevel} уровня!`);
+                    }, 1000);
+                }
             }
         }
 
-        let gameManager;
+        // Инициализируем приложение
+        let app;
 
         document.addEventListener('DOMContentLoaded', function() {
-            gameManager = new GameManager();
+            app = new TelegramMiniApp();
         });
 
-        // Глобальные функции
-        function showScreen(screenId) { gameManager.showScreen(screenId); }
-        function startExam() { gameManager.startExam(); }
-        function showStats() { gameManager.showMessage('Статистика: В разработке', 'info'); }
-        function showHelp() { gameManager.showMessage('Помощь: Отвечайте на вопросы за 30 секунд. Получайте очки и повышайте уровень!', 'info'); }
-        function showLeaderboard() { gameManager.showMessage('Рейтинг: Функция в разработке', 'info'); }
+        // Глобальные функции для кнопок
+        function showScreen(screenId) {
+            app.showScreen(screenId);
+        }
+
+        function startExam() {
+            app.startExam();
+        }
+
+        function showStats() {
+            app.showMessage('Статистика: В разработке', 'info');
+        }
+
+        function showHelp() {
+            app.showMessage('Помощь: Отвечайте на вопросы за 30 секунд. Получайте очки и повышайте уровень!', 'info');
+        }
+
+        function showLeaderboard() {
+            app.showMessage('Рейтинг: Функция в разработке', 'info');
+        }
     </script>
 </body>
 </html>
